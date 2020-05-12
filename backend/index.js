@@ -31,6 +31,10 @@ pgClient
     .query('CREATE TABLE IF NOT EXISTS nwd_value (number INT)')
     .catch(error => console.log(error));
 
+pgClient
+	.query('CREATE TABLE IF NOT EXISTS ppk (salary DOUBLE PRECISION, employee DOUBLE PRECISION, employer DOUBLE PRECISION, result DOUBLE PRECISION)')
+	.catch(error => console.log(error));
+
 // Redis Client Setup
 const redisClient = redis.createClient({
    host: keys.redisHost,
@@ -71,6 +75,36 @@ app.get('/', (req, res) =>{
 
     res.send("Thanks for visiting.");
 });
+
+app.get("/calculatePPK", (req, res) => {
+    const salary = req.query.salary;
+    const employee = req.query.employee;
+    const employer = req.query.employer;
+
+if (!salary || !employee || !employer) {
+    return res.send("Podaj wszystkie dane");
+}
+
+    const code = `${salary}_${employee}_${employer}`;
+
+redisClient.exists(code, (err, exists) => {
+    if (exists === 1) {
+        redisClient.get(code, (err, result) => {
+            res.send(`${result} (cache)`);
+            return;
+        });
+    } else {
+        const result = salary * employee/100 + salary * employer/100;
+        redisClient.set(code, result);
+        pgClient.connect()
+        .then(() => console.log("Connected successfully"))
+        .then(() => pgClient.query(`INSERT INTO ppk (salary, employee, employer, result) VALUES (${salary}, ${employee},${employer}, ${result})`, (err) => {console.log(err)}))
+        .catch(e => console.log(e));    
+        res.send(`${result}`);
+    }
+});
+});
+
 
 getNwd = (queryObject) => {
     a = parseInt(queryObject.l1);

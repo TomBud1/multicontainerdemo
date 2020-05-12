@@ -10,6 +10,16 @@ function App() {
     console.log(helloResponse);
   }
 
+  const countingValue = async (e) => {
+    const salary = document.getElementById("salary").value;
+    const employee = document.getElementById("employee").value;
+    const employer = document.getElementById("employer").value;
+
+    const response = await axios.get(`/api/calculatePPK?salary=${salary}&employee=${employee}&employer=${employer}`);
+    document.getElementById("result").innerText = `Całowita składka przelana na konto w PPK: ${response.data}`;
+  };
+
+
   return (
     <div className="App">
       <header className="App-header">
@@ -17,19 +27,30 @@ function App() {
         <div>
           <button onClick={handleClick}> Send Request to backend </button>
         </div>
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <div>
+          <form>
+            <div>
+            	<label>Wynagrodzenie całkowite brutto</label>
+              <input type="text'" id="salary"/>
+	          </div>
+
+	          <div>
+		          <label>Wymiar składki pracownika w %</label>
+		          <input type="text" id="employee"/>
+	          </div>
+
+            <div>
+		          <label>Wymiar składki pracodawcy w %</label>
+		          <input type="text" id="employer"/>
+	          </div>
+            <button type="button" onClick={countingValue}>Oblicz</button>
+        </form>
+	</div>
+      <div id="result">
+      </div>
       </header>
     </div>
+
   );
 }
 
