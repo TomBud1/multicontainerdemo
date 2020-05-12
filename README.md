@@ -1,4 +1,4 @@
-PPK calculator 
+Kalkulator PPK
 
 docker-compose up --build
 
